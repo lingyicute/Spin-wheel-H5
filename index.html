@@ -692,11 +692,11 @@
     const desired = norm(-Math.PI/2 - (winIdx + .5) * seg);
     let delta = norm(desired - norm(rotation));
     if(delta < .2) delta += TAU;                       // 避免停在原地
-    const turns = 5 + Math.random() * 4;               // 5~9 圈
+    const turns = 5 + Math.floor(Math.random() * 4);   // 5~8 圈完整圈数
     const from = rotation, to = rotation + turns * TAU + delta;
     const dur = duration * 1000;
     const t0 = performance.now();
-    let lastPtr = -1;
+    let lastPtr = pointerIndex();
 
     function frame(t){
       const p = Math.min(1, (t - t0) / dur);
@@ -793,12 +793,8 @@
   }
   window.addEventListener('resize', ()=>{ if(!winOverlay.classList.contains('hidden')){ confCanvas.width = innerWidth; confCanvas.height = innerHeight; } });
 
-  /* ================= 主循环（含怠速微转） ================= */
-  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let lastT = performance.now();
-  function loop(t){
-    const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
-    if(!spinning && !reduceMotion && items.length > 1) rotation = norm(rotation + dt * .12);
+  /* ================= 主循环 ================= */
+  function loop(){
     drawWheel();
     requestAnimationFrame(loop);
   }
