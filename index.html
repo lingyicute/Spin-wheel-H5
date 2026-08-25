@@ -203,7 +203,6 @@
     opacity:1; transition:opacity .35s;
   }
   .overlay.hidden{ opacity:0; pointer-events:none; }
-  #confetti{ position:absolute; inset:0; z-index:0; }
 
   /* 中奖弹层 */
   .win-card{ position:relative; z-index:1; text-align:center; padding:20px; max-width:92vw; }
@@ -338,7 +337,6 @@
 
   <!-- ============ 中奖全屏弹层 ============ -->
   <div class="overlay hidden" id="winOverlay">
-    <canvas id="confetti"></canvas>
     <div class="win-card">
       <svg class="win-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.3 12.2 2.5 2.5 4.9-5.4"/></svg>
       <div class="win-label">本轮结果 · RESULT</div>
@@ -692,11 +690,11 @@
     const desired = norm(-Math.PI/2 - (winIdx + .5) * seg);
     let delta = norm(desired - norm(rotation));
     if(delta < .2) delta += TAU;                       // 避免停在原地
-    const turns = 5 + Math.random() * 4;               // 5~9 圈
+    const turns = 5 + Math.floor(Math.random() * 4);   // 5~8 圈完整圈数
     const from = rotation, to = rotation + turns * TAU + delta;
     const dur = duration * 1000;
     const t0 = performance.now();
-    let lastPtr = -1;
+    let lastPtr = pointerIndex();
 
     function frame(t){
       const p = Math.min(1, (t - t0) / dur);
@@ -727,10 +725,7 @@
     pointerEl.classList.add('wiggle');
   }
 
-  /* ================= 中奖弹层 & 彩带 ================= */
-  const confCanvas = $('#confetti'), cctx = confCanvas.getContext('2d');
-  let confetti = [], confRunning = false, confT0 = 0;
-  const confColors = ['#f6c453','#ffd770','#7c5cff','#2fe0c0','#ff7eb0','#ffffff','#9ef75b','#5cc9ff'];
+  /* ================= 中奖弹层 ================= */
 
   function showWinner(idx){
     winName.textContent = items[idx];
@@ -738,67 +733,11 @@
     $('#againBtn').style.display = items.length >= 2 ? '' : 'none';
     $('#removeWinBtn').style.display = items.length ? '' : 'none';
     winOverlay.classList.remove('hidden');
-    startConfetti();
   }
-  function hideWinner(){ winOverlay.classList.add('hidden'); confetti = []; }
+  function hideWinner(){ winOverlay.classList.add('hidden'); }
 
-  function startConfetti(){
-    confCanvas.width = innerWidth; confCanvas.height = innerHeight;
-    const W = innerWidth, H = innerHeight;
-    confetti = [];
-    for(let i = 0; i < 220; i++){
-      const fromLeft = Math.random() < .5;
-      confetti.push({
-        x: W/2 + (fromLeft ? -1 : 1) * (40 + Math.random()*60),
-        y: H * .34,
-        vx: (fromLeft ? -1 : 1) * (Math.random() * 11 + 1.5),
-        vy: -(Math.random() * 13 + 3),
-        w: 6 + Math.random() * 8,
-        h: 8 + Math.random() * 10,
-        r: Math.random() * TAU,
-        vr: (Math.random() - .5) * .3,
-        c: confColors[i % confColors.length],
-        sway: Math.random() * TAU,
-        circ: Math.random() < .22
-      });
-    }
-    confT0 = performance.now();
-    if(!confRunning){ confRunning = true; requestAnimationFrame(confLoop); }
-  }
-  function confLoop(t){
-    const dt = Math.min(32, t - (confLoop._p || t)); confLoop._p = t;
-    cctx.clearRect(0, 0, confCanvas.width, confCanvas.height);
-    const elapsed = t - confT0;
-    let alive = false;
-    for(const p of confetti){
-      p.vy += .28;
-      p.vx *= .992; p.vy *= .995;
-      p.x += p.vx; p.y += p.vy;
-      p.sway += .15;
-      p.x += Math.sin(p.sway) * .6;
-      p.r += p.vr;
-      const fade = clamp((6500 - elapsed) / 900, 0, 1);
-      if(p.y < innerHeight + 60 && fade > 0) alive = true;
-      cctx.save();
-      cctx.globalAlpha = fade;
-      cctx.translate(p.x, p.y);
-      cctx.rotate(p.r);
-      cctx.fillStyle = p.c;
-      if(p.circ){ cctx.beginPath(); cctx.arc(0, 0, p.w/2, 0, TAU); cctx.fill(); }
-      else cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h * .6);
-      cctx.restore();
-    }
-    if(alive && !winOverlay.classList.contains('hidden')) requestAnimationFrame(confLoop);
-    else { confRunning = false; cctx.clearRect(0, 0, confCanvas.width, confCanvas.height); }
-  }
-  window.addEventListener('resize', ()=>{ if(!winOverlay.classList.contains('hidden')){ confCanvas.width = innerWidth; confCanvas.height = innerHeight; } });
-
-  /* ================= 主循环（含怠速微转） ================= */
-  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let lastT = performance.now();
-  function loop(t){
-    const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
-    if(!spinning && !reduceMotion && items.length > 1) rotation = norm(rotation + dt * .12);
+  /* ================= 主循环 ================= */
+  function loop(){
     drawWheel();
     requestAnimationFrame(loop);
   }
