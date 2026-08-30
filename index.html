@@ -387,6 +387,16 @@
   let duration = 6;              // 旋转时长（秒）
   let muted = false;
   const MAX_ITEMS = 100;
+  
+  /* ================= 预置 =================
+     在下方数组中填写待选项。运行时只要数组中存在有效选项，
+     就会覆盖浏览器本地存储（localStorage）中保存的待选项；
+     把数组清空（改为 const PRESET_ITEMS = [];）则恢复读取本地存储。
+     预置生效期间，在页面上对选项的增删改仅在当次会话有效，
+     刷新页面后仍会恢复为这里的预置项。 */
+  const PRESET_ITEMS = [
+   // '火锅', '烧烤', '麻辣烫'
+  ];
 
   /* ================= DOM ================= */
   const canvas = $('#wheel'), ctx = canvas.getContext('2d');
@@ -408,6 +418,20 @@
       localStorage.setItem('lw_dur', String(duration));
     }catch(e){}
   }
+    /* 清洗选项列表：去空白、去重，限制单项长度与总数量 */
+  function sanitizeItems(list){
+    if(!Array.isArray(list)) return [];
+    const out = [];
+    for(const x of list){
+      if(typeof x !== 'string') continue;
+      const v = x.trim().slice(0, 24);
+      if(!v || out.includes(v)) continue;
+      out.push(v);
+      if(out.length >= MAX_ITEMS) break;
+    }
+    return out;
+  }
+  
   function load(){
     try{
       const a = JSON.parse(localStorage.getItem('lw_items') || '[]');
@@ -416,6 +440,12 @@
       const d = parseFloat(localStorage.getItem('lw_dur'));
       if(!isNaN(d)) duration = Math.min(10, Math.max(3, d));
     }catch(e){}
+    const preset = sanitizeItems(PRESET_ITEMS);
+    if(preset.length){
+      items = preset;
+      save();   // 同步覆盖 localStorage，保证存储与预置一致
+      setTimeout(()=> toast(`已加载代码中预置的 ${preset.length} 个选项`, 'ok'), 350);
+    }
   }
 
   /* ================= 工具 ================= */
