@@ -666,7 +666,7 @@ const PRESET_ITEMS = [
     /* ---- 文字（由中心向外展开，数量多时自动缩小） ---- */
     const fs = clamp(seg * F * .12, 10, 34);
     ctx.font = `700 ${fs}px "PingFang SC","Microsoft YaHei",system-ui,sans-serif`;
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#fff';
     ctx.shadowColor = 'rgba(0,0,0,.5)';
@@ -674,7 +674,8 @@ const PRESET_ITEMS = [
     ctx.shadowOffsetY = 1;
     const hubR = (spinBtn.offsetWidth || 96) / 2 + 14;   // 避开中心按钮的实际半径，防止遮挡文字
     const x0 = Math.min(Math.max(hubR, F * .12), F * .45);
-    const maxW = F * .93 - x0;
+    const x1 = F * .93;
+    const maxW = x1 - x0;
     for(let i = 0; i < n; i++){
       const mid = rotation + (i + .5) * seg;
       let label = items[i];
@@ -684,7 +685,7 @@ const PRESET_ITEMS = [
       }
       ctx.save();
       ctx.rotate(mid);
-      ctx.fillText(label, x0, 0);
+      ctx.fillText(label, x1, 0);
       ctx.restore();
     }
     ctx.restore();
