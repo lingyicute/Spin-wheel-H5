@@ -1,0 +1,42 @@
+{
+  "name": "spin-wheel-h5",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.lyi.spin",
+    "productName": "Spin Wheel", 
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        ["nsis", "portable"]
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lingyicute/Spin-wheel-H5.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lingyicute/Spin-wheel-H5/issues"
+  },
+  "homepage": "https://github.com/lingyicute/Spin-wheel-H5#readme",
+  "devDependencies": {
+    "electron": "^44.1.0",
+    "electron-builder": "^26.15.3"
+  }
+}
