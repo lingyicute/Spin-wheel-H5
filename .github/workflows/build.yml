@@ -23,3 +23,5 @@ jobs:
         npm install
         npm run build
         gh release create nightly "dist/Spin Wheel 1.0.0.exe" --title "Nightly Build" --notes "build for windows" --prerelease --target "$GITHUB_SHA"
+      env:
+        GH_TOKEN: ${{ github.token }}
