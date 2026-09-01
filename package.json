@@ -13,15 +13,10 @@
     "directories": {
       "output": "dist"
     },
-"win": {
+    "win": {
       "target": [
-        "nsis",
         "portable"
       ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
     }
   },
   "repository": {
