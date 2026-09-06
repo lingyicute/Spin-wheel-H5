@@ -4,7 +4,7 @@ A beautiful web-based random spinning wheel.
 
 ## Try it
 
-[spin.92li.uk](spin.92li.uk)
+[spin.92li.uk](https://spin.92li.uk)
 
 ## 🗂️ License
 
